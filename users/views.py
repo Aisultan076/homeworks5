@@ -1,3 +1,5 @@
+import string
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,20 +7,27 @@ from django.contrib.auth.models import User
 from .serializers import UserCreateSerializer, UserAuthSerializer, ConfirmUserSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from .models import ConfirmationCode
+from .models import ConfirmationCode, CustomUser
 from rest_framework.views import APIView
 import random
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.generics import CreateAPIView
 
 
-class AuthorizationAPIView(APIView):
+class AuthorizationAPIView(CreateAPIView):
+    @swagger_auto_schema(
+        request_body=UserAuthSerializer,
+        responses={200: openapi.Response(description='Успешный вход')}
+    )
     def post(self, request):
         serializer = UserAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
         password = serializer.validated_data['password']
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({'key': token.key})
@@ -26,19 +35,28 @@ class AuthorizationAPIView(APIView):
 
 
 class RegistrationAPIView(APIView):
+    @swagger_auto_schema(
+        request_body=UserCreateSerializer,
+        responses={201: openapi.Response(description='Регистрация успешна')}
+    )
     def post(self, request):
         serializer = UserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
 
-        user = User.objects.create_user(username=username, password=password, is_active=False)
+        user = CustomUser.objects.create_user(email=email, password=password, is_active=False)
 
-        code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-        ConfirmationCode.objects.create(user=user, code=code)
+        code = ''.join(random.choices(string.digits, k=6))
 
-        print(f'Код подтверждения для пользователя {username}: {code}')  # Для отладки
+        print("user:", 'user')
+        confirmation_code = ConfirmationCode.objects.create(
+            user=user,
+            code=code
+        )
+        print("user_id", user.id)
+        print(f'Код подтверждения для пользователя {email}: {code}')  # Для отладки
 
         return Response(
             {'user_id': user.id, 'detail': 'Пользователь создан. Проверьте код подтверждения.'},
@@ -46,7 +64,11 @@ class RegistrationAPIView(APIView):
         )
 
 
-class ConfirmUserAPIView(APIView):
+class ConfirmUserAPIView(CreateAPIView):
+    serializer_class = ConfirmUserSerializer
+    @swagger_auto_schema(
+        request_body=ConfirmUserSerializer
+    )
     def post(self, request):
         serializer = ConfirmUserSerializer(data=request.data)
         if serializer.is_valid():
