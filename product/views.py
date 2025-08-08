@@ -1,3 +1,4 @@
+from django.template.context_processors import request
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +9,7 @@ from .serializers import ProductWithReviewsSerializer, CategoryWithCountSerialzi
 from django.db.models import Count
 from django.db import transaction
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-
+from common.permissions import IsModeratorPermission
 
 class CategoryListCreateAPIView(ListCreateAPIView):
     queryset = Category.objects.all()
@@ -44,6 +45,7 @@ class CategoryDetailAPIView(RetrieveUpdateDestroyAPIView):
 
 class ProductListCreateAPIView(ListCreateAPIView):
     queryset = Product.objects.all()
+    permission_classes = [IsModeratorPermission]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -58,13 +60,21 @@ class ProductListCreateAPIView(ListCreateAPIView):
                 title=serializer.validated_data['title'],
                 description=serializer.validated_data['description'],
                 price=serializer.validated_data['price'],
-                category_id=serializer.validated_data['category']
+                category_id=serializer.validated_data['category'],
+                moderator=request.user
             )
         return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
+
+class ModeratorProductListAPIView(ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(moderator=self.request.user).select_related('category')
 
 class ProductDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     lookup_field = 'id'
+    permission_classes = [IsModeratorPermission]
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
