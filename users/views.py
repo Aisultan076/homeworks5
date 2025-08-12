@@ -13,7 +13,8 @@ import random
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.generics import CreateAPIView
-
+from rest_framework_simplejwt.views import TokenObtainPairView
+from users.serializers import CustomTokenObtainPairSerializer
 
 class AuthorizationAPIView(CreateAPIView):
     @swagger_auto_schema(
@@ -76,6 +77,8 @@ class ConfirmUserAPIView(CreateAPIView):
             return Response({"detail": "Пользователь подтвержден и активирован"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 @api_view(['POST'])

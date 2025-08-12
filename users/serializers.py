@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import ConfirmationCode
 from django.contrib.auth import authenticate
 from users.models import CustomUser
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserAuthSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -70,3 +71,29 @@ class ConfirmUserSerializer(serializers.Serializer):
         user = self.validated_data['user']
         user.is_active = True
         user.save()
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['birthday'] = str(user.birthday) if user.birthday else None
+        return token
+
+    def validate(self, attrs):
+        credentials = {
+            'email': attrs.get('email'),
+            'password': attrs.get('password')
+        }
+        user = authenticate(**credentials)
+
+        if user is None or not user.is_active:
+            raise serializers.ValidationError(
+                "Не найдено активной учетной записи с указанными данными"
+            )
+
+        data = super().validate(attrs)
+        data['birthday'] = str(user.birthday) if user.birthday else None
+        return data

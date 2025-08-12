@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from users.models import CustomUser
+from users.models import CustomUser, ConfirmationCode
+
+
+
 # Register your models here.
 
 @admin.register(CustomUser)
@@ -11,3 +14,5 @@ class CustomUserAdmin(UserAdmin):
         ('Personal info', {'fields': ('username',)}),
         ('Date information', {'fields': ('last_login',)}),
     )
+
+admin.site.register(ConfirmationCode)

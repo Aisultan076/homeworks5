@@ -6,6 +6,7 @@ from unicodedata import category
 from .models import Category, Product, Review
 from django.db.models import Avg, Count
 from rest_framework.exceptions import ValidationError
+from common.validators import validate_user_is_adult
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,11 +15,19 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-
     class Meta:
         model = Product
         fields = '__all__'
+        read_only_fields = ('owner',)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        validate_user_is_adult(user.birthday)
+        return attrs
+
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
