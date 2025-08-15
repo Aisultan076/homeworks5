@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -156,6 +157,18 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<72935732959-vtec5m79l78158mte8ee9e0m1hovgqj3.apps.googleusercontent.com>'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<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>'
+
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
