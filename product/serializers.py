@@ -7,6 +7,9 @@ from .models import Category, Product, Review
 from django.db.models import Avg, Count
 from rest_framework.exceptions import ValidationError
 from common.validators import validate_user_is_adult
+from .models import Product
+from rest_framework_simplejwt.tokens import AccessToken
+from datetime import datetime
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,9 +23,26 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('owner',)
 
+    def _get_birthday_from_token(self):
+        request = self.context['request']
+        auth_header = request.headers.get('Authorization')
+
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return None
+
+        token_str = auth_header.split(' ')[1]
+        try:
+            access_token = AccessToken(token_str)
+            birthday_str = access_token.get('birthday')
+            if birthday_str and birthday_str != "None":
+                return datetime.strptime(birthday_str, "%Y-%m-%d").date()
+            return None
+        except Exception:
+            return None
+
     def validate(self, attrs):
-        user = self.context['request'].user
-        validate_user_is_adult(user.birthday)
+        birthday = self._get_birthday_from_token()
+        validate_user_is_adult(birthday)
         return attrs
 
     def create(self, validated_data):

@@ -79,7 +79,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token['birthday'] = str(user.birthday) if user.birthday else None
+        if user.birthday:
+            token['birthday'] = str(user.birthday)
+        else:
+            token['birthday'] = None
         return token
 
     def validate(self, attrs):

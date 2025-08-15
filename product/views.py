@@ -67,9 +67,11 @@ class ProductListCreateAPIView(ListCreateAPIView):
 
 class ModeratorProductListAPIView(ListAPIView):
     serializer_class = ProductSerializer
+    permission_classes = [IsModeratorPermission]
 
     def get_queryset(self):
         return Product.objects.filter(moderator=self.request.user).select_related('category')
+
 
 class ProductDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
