@@ -15,6 +15,7 @@ from drf_yasg import openapi
 from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.serializers import CustomTokenObtainPairSerializer
+from users.utils import generate_confirmation_code, save_code_to_cache, verify_code
 
 class AuthorizationAPIView(CreateAPIView):
     @swagger_auto_schema(
@@ -127,3 +128,23 @@ def confirm_user_api_view(request):
         serializer.save()
         return Response({"detail": "Пользователь подтвержден и активирован"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendCodeAPIView(APIView):
+    def post(self, request):
+        user_id = request.user.id
+        code = generate_confirmation_code()
+        save_code_to_cache(user_id, code)
+
+        # тут можно отправить SMS/email
+        return Response({"detail": "Код отправлен"}, status=status.HTTP_200_OK)
+
+
+class VerifyCodeAPIView(APIView):
+    def post(self, request):
+        user_id = request.user.id
+        code = request.data.get("code")
+
+        if verify_code(user_id, code):
+            return Response({"detail": "Код подтвержден"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Неверный или просроченный код"}, status=status.HTTP_400_BAD_REQUEST)

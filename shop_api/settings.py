@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+import django_redis
+import random
+from django.core.cache import cache
 
 from datetime import timedelta
 
@@ -169,6 +172,16 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<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>'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
