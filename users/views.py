@@ -136,7 +136,6 @@ class SendCodeAPIView(APIView):
         code = generate_confirmation_code()
         save_code_to_cache(user_id, code)
 
-        # тут можно отправить SMS/email
         return Response({"detail": "Код отправлен"}, status=status.HTTP_200_OK)
 
 
