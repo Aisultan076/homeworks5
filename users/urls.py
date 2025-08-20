@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-from users.views import GoogleAuthView
+from users.oauth import GoogleAuthView
 
 urlpatterns = [
     path('auth/', AuthorizationAPIView.as_view(), name='auth'),
