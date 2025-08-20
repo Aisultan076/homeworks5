@@ -166,8 +166,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '<72935732959-vtec5m79l78158mte8ee9e0m1hovgqj3.apps.googleusercontent.com>'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '<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>'
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('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')
 
 
 LOGIN_REDIRECT_URL = '/'
