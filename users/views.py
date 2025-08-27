@@ -61,12 +61,13 @@ class RegistrationAPIView(APIView):
         print("user_id", user.id)
         print(f'Код подтверждения для пользователя {email}: {code}')  # Для отладки
 
+        send_welcome_email.delay(email)
+        long_runing_task.delay(20)
+
         return Response(
             {'user_id': user.id, 'detail': 'Пользователь создан. Проверьте код подтверждения.'},
             status=status.HTTP_201_CREATED
         )
-        send_welcome_email(to_email)
-        long_runing_task.delay(n)
 
 
 class ConfirmUserAPIView(CreateAPIView):
