@@ -1,6 +1,8 @@
 from celery import shared_task
 import time
 import datetime
+
+from django.conf import settings
 from django.core.mail import send_mail
 
 
@@ -19,7 +21,7 @@ def send_welcome_email(to_email):
     send_mail(
         subject="Добро пожаловать!",
         message="Спасибо за регистрацию!",
-        from_email="your_email@gmail.com",
+        from_email=settings.EMAIL_HOST_USER,
         recipient_list=[to_email],
         fail_silently=False,
     )

@@ -16,6 +16,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.serializers import CustomTokenObtainPairSerializer
 from users.utils import generate_confirmation_code, save_code_to_cache, verify_code
+from users.tasks import send_welcome_email, long_runing_task
 
 class AuthorizationAPIView(CreateAPIView):
     @swagger_auto_schema(
@@ -64,6 +65,8 @@ class RegistrationAPIView(APIView):
             {'user_id': user.id, 'detail': 'Пользователь создан. Проверьте код подтверждения.'},
             status=status.HTTP_201_CREATED
         )
+        send_welcome_email(to_email)
+        long_runing_task.delay(n)
 
 
 class ConfirmUserAPIView(CreateAPIView):
