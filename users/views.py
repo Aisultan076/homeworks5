@@ -16,7 +16,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from users.serializers import CustomTokenObtainPairSerializer
 from users.utils import generate_confirmation_code, save_code_to_cache, verify_code
-from users.tasks import send_welcome_email, long_runing_task
+from users.tasks import send_welcome_email, long_running_task
 
 class AuthorizationAPIView(CreateAPIView):
     @swagger_auto_schema(
@@ -62,7 +62,7 @@ class RegistrationAPIView(APIView):
         print(f'Код подтверждения для пользователя {email}: {code}')  # Для отладки
 
         send_welcome_email.delay(email)
-        long_runing_task.delay(20)
+        long_running_task.delay(20)
 
         return Response(
             {'user_id': user.id, 'detail': 'Пользователь создан. Проверьте код подтверждения.'},
