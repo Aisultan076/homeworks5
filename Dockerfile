@@ -8,6 +8,8 @@ WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
 
-RUN pip install /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . .
+
+RUN mkdir -p /app/static /app/media
