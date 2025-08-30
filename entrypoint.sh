@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "Apply database migrations..."
+python manage.py migrate --noinput
+
+echo "Collect static files..."
+python manage.py collectstatic --noinput
+
+echo "Starting Gunicorn..."
+exec gunicorn shop_api.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 3 \
+    --timeout 120
+
+chmod +x entrypoint.sh
